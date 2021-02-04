@@ -384,5 +384,7 @@ start_app()
 ### REFER to products & courier lists by index or name - CONSISTENCY - use n += 1 with for loop
 ### CHANGE populate lists & update txt files functions (to have one of each &) to take arguments depending on if they're used for products or couriers. (vs two seperate functions for populating or for updating txt files)
 
+#lil useless change
+
 ### Move clear() to bottom/end of functions
 ### Make code even cleaner. Add functions to simplify each one
