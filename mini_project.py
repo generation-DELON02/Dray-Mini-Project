@@ -1,7 +1,7 @@
 products = [{'Name' : 'Pandan Cake', 'Price' : 2.5}, {'Name' : 'Chouquettes', 'Price' : 1.0}, {'Name' : 'Thai Iced Tea', 'Price' : 2.0}, {'Name' : 'Hot Chocolate', 'Price' : 1.5}]
 couriers = [{'Name' : 'Dillon', 'Contact Number' : '07931647478'}, {'Name' : 'Oscar', 'Contact Number' : '07800996961'}, {'Name' : 'Saskia', 'Contact Number' : '07931468682'}]
-order_1 = {'Name' : 'Andre L', 'Address' : '29 Holland Road, London, NW10 5AH', 'Contact Number' : '07931647479', 'Courier' : '2', 'Status' : 'Preparing', 'Items' : [1, 2, 3]}
-order_2 = {'Name' : 'Victoire C', 'Address' : '42 Cadogan Square, London, SW1 0HX', 'Contact Number' : '07800996960', 'Courier' : '3', 'Status' : 'Preparing', 'Items' : [1, 4]}
+order_1 = {'Name' : 'Andre L', 'Address' : '29 Holland Road, London, NW10 5AH', 'Contact Number' : '07931647479', 'Courier' : 2, 'Status' : 'Preparing', 'Items' : [1, 2, 3]}
+order_2 = {'Name' : 'Victoire C', 'Address' : '42 Cadogan Square, London, SW1 0HX', 'Contact Number' : '07800996960', 'Courier' : 3, 'Status' : 'Preparing', 'Items' : [1, 4]}
 orders = [order_1, order_2]
 
 def start_app():
@@ -184,54 +184,59 @@ def add_order():
     add_order_product(new_order)
     add_order_another_product(new_order)
     add_order_courier(new_order)
+    print('\n')
+    for key, value in new_order.items():
+        print(f'{key}: {value}')
+    print("\nThe new order has successfully been added to the Order List.")
+    orders.append(new_order)
     order_menu()
 
 def add_order_product(new_order):
     while True:
         print('\n')
         print_product_list()
-        user_input = int(input("\nSelect a product from the list to add to the new order. Please enter the listing number before the desired product: "))
         try:
+            user_input = int(input("\nSelect a product from the list to add to the new order. Please enter the listing number before the desired product: "))
             products[user_input - 1]
-            break
         except:
             incorrect_command()
             continue
+        if user_input == 0:
+            incorrect_command()
+            continue
+        break
     new_order['Items'].append(user_input)
 
 def add_order_another_product(new_order):
     while True:
         print('\n')
         print_product_list()
-        user_input = int(input("\nSelect another product to add to the new order if you would like. Please enter the listing number before the desired product.\nEnter '0' to not add another product: "))
-        if user_input == 0:
-            break
         try:
+            user_input = int(input("\nSelect another product to add to the new order if you would like. Please enter the listing number before the desired product.\nEnter '0' to not add another product: "))
             products[user_input - 1]
-            new_order['Items'].append(user_input)
-            continue
         except:
             incorrect_command()
             continue
+        if user_input == 0:
+            break
+        new_order['Items'].append(user_input)
     new_order['Items'].sort()
 
 def add_order_courier(new_order):
     while True:
         print('\n')
         print_courier_list()
-        user_input = int(input("\nSelect a courier from the list above\nPlease enter the listing number before the desired courier: "))
         try:
-            orders[user_input - 1]    
-            break
+            user_input = int(input("\nSelect a courier from the list above.\nPlease enter the listing number before the desired courier: "))
+            couriers[user_input - 1]    
         except:
             incorrect_command()
             continue
+        if user_input == 0:
+            incorrect_command()
+            continue
+        break
     new_order['Courier'] = user_input
-    print('\n')
-    for key, value in new_order.items():
-        print(f'{key}: {value}')
-    print("\nThe new order has successfully been added to the Order List.")
-    orders.append(new_order)
 
 def change_order_status_order_selection():
     clear()
@@ -333,7 +338,160 @@ def replace_courier():
         courier_menu()
         break
 
-#def replace_order_values():
+def replace_order_values():
+    clear()
+    while True:
+        print('\n')
+        print_order_list()
+        try:
+            user_input = int(input("Which order would you like to update?\nPlease enter the number of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
+            selected_order = orders[user_input - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input == 0:
+            order_menu()
+            break
+        print('\nSelected order:\n')
+        for key, value in selected_order.items():
+            print(f'{key}: {value}')
+        print('\n')
+        replace_order_value_name(selected_order)
+        break
+    print('\nOrder succesfully updated:\n')
+    for key, value in selected_order.items():
+        print(f'{key}: {value}')
+    order_menu()
+
+def replace_order_value_name(selected_order):
+    user_input = input("What would you like to replace the customer's name associated to the order to?\nLeave blank & press Enter to skip updating this piece of information: ")
+    if user_input == "":
+        pass
+    else:
+        selected_order['Name'] = user_input.title()
+    replace_order_value_address(selected_order)
+
+def replace_order_value_address(selected_order):
+    user_input = input("What would you like to replace the customer's address to?\nLeave blank & press Enter to skip updating this piece of information: ")
+    if user_input == "":
+        pass
+    else:
+        selected_order['Address'] = user_input.title()
+    replace_order_value_contact_number(selected_order)
+
+def replace_order_value_contact_number(selected_order):
+    user_input = input("What would you like to replace the customer's contact number to?\nLeave blank & press Enter to skip updating this piece of information: ")
+    if user_input == "":
+        pass
+    else:
+        selected_order['Contact Number'] = user_input
+    replace_order_value_courier(selected_order)
+
+def replace_order_value_courier(selected_order):
+    while True:
+        print('\n')
+        print_courier_list()
+        user_input = input("\nSelect a courier from the list above to allocate to the order.\nPlease enter the listing number before the desired courier.\nLeave blank & press Enter to skip updating this piece of information: ")
+        if user_input == "":
+            replace_order_value_adding_product(selected_order)
+        try:
+            user_input_int = int(user_input)
+            couriers[user_input_int - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input_int == 0:
+            incorrect_command()
+            continue
+        break
+    selected_order['Courier'] = user_input_int
+    replace_order_value_adding_product(selected_order)
+
+def replace_order_value_adding_product(selected_order):
+    while True:
+        print('\n')
+        print_product_list()
+        user_input = input("\nWhich product would you like to add to the order?\nPlease enter the listing number before the desired product.\nLeave blank & press Enter to skip adding products to the order: ")
+        if user_input == "":
+            replace_order_value_removing_product(selected_order)
+        try:
+            user_input_int = int(user_input)
+            products[user_input_int - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input_int == 0:
+            incorrect_command()
+            continue
+        break
+    selected_order['Items'].append(user_input_int)
+    replace_order_value_adding_another_product(selected_order)
+
+def replace_order_value_adding_another_product(selected_order):
+    while True:
+        print('\n')
+        print_product_list()
+        user_input = input("\nIf you would like to add another product to the order, please enter the listing number before the desired product.\nLeave blank & press Enter to skip adding more products to the order: ")
+        if user_input == "":
+            selected_order['Items'].sort()
+            replace_order_value_removing_product(selected_order)
+            break
+        try:
+            user_input_int = int(user_input)
+            products[user_input_int - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input_int == 0:
+            incorrect_command()
+            continue
+        selected_order['Items'].append(user_input_int)
+
+def replace_order_value_removing_product(selected_order):
+    while True:
+        print('\n')
+        print_product_list()
+        print('\nProducts in selected order:\n')
+        for key, value in selected_order.items():
+            if key == 'Items':
+                print(value)
+        user_input = input("\nWhich product would you like to remove from the order?\nPlease enter the listing number associated to the desired product.\nLeave blank & press Enter to skip removing products from the order: ")
+        if user_input == "":
+            break
+        try:
+            user_input_int = int(user_input)
+            products[user_input_int - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input_int == 0:
+            incorrect_command()
+            continue
+        break
+    selected_order['Items'].remove(user_input_int)
+    replace_order_value_removing_another_product(selected_order)
+
+def replace_order_value_removing_another_product(selected_order):
+    while True:
+        print('\n')
+        print_product_list()
+        print('\nProducts in the selected order:\n')
+        for key, value in selected_order.items():
+            if key == 'Items':
+                print(value)
+        user_input = input("\nIf you would like to remove another product to the order, please enter the listing number before the desired product.\nLeave blank & press Enter to skip removing more products from the order: ")
+        if user_input == "":
+            break
+        try:
+            user_input_int = int(user_input)
+            products[user_input_int - 1]
+        except:
+            incorrect_command()
+            continue
+        if user_input_int == 0:
+            incorrect_command()
+            continue
+        selected_order['Items'].remove(user_input_int)
 
 def delete_product():
     clear()
@@ -342,14 +500,15 @@ def delete_product():
         print_product_list()
         try:
             user_input = int(input("\nWhich product would you like to remove from the Product List?\nPlease enter the listing number before the product.\nEnter '0' to cancel deletion & return to Product Menu: "))
-            selected_product = products[user_input - 1]
+            product_index = user_input - 1
+            selected_product = products[product_index]
         except:
             incorrect_command()
             continue
         if user_input == 0:
             product_menu()
             break
-        confirm_delete_product(user_input, selected_product)
+        confirm_delete_product(product_index, selected_product)
         break
 
 def confirm_delete_product(product_index, selected_product):
@@ -362,7 +521,7 @@ def confirm_delete_product(product_index, selected_product):
         elif user_input == '1':
             clear()
             print(f'\n{selected_product} has successfully been removed from the Product List.')
-            del products[product_index - 1]
+            del products[product_index]
             product_menu()
             break
         else:
@@ -375,14 +534,15 @@ def delete_courier():
         print_courier_list()
         try:
             user_input = int(input("\nWhich courier would you like to remove from the Courier List?\nPlease enter the listing number before the courier.\nEnter '0' to cancel deletion & return to Courier Menu: "))    #FIND how to delete several at once? Same as adding several?
-            selected_courier = couriers[user_input - 1]
+            courier_index = user_input - 1
+            selected_courier = couriers[courier_index]
         except:
             incorrect_command()
             continue
         if user_input == 0:
             courier_menu()
             break
-        confirm_delete_courier(user_input, selected_courier)
+        confirm_delete_courier(courier_index, selected_courier)
         break
 
 def confirm_delete_courier(courier_index, selected_courier):
@@ -395,7 +555,7 @@ def confirm_delete_courier(courier_index, selected_courier):
         elif user_input == '1':
             clear()
             print(f'\n{selected_courier} has successfully been removed from the Courier List.')
-            del couriers[courier_index - 1]
+            del couriers[courier_index]
             courier_menu()
             break
         else:
@@ -406,7 +566,7 @@ def delete_order():
     while True:
         print_order_list()
         try:
-            user_input = int(input("\nWhich order would you like to remove from your Order List?\nPlease enter the number of the order.\nEnter '0' to cancel deletion & return to Order Menu: "))
+            user_input = int(input("\nWhich order would you like to remove from the Order List?\nPlease enter the number of the order.\nEnter '0' to cancel deletion & return to Order Menu: "))
             order_index = user_input - 1
             selected_order = orders[order_index]
         except:
@@ -418,19 +578,20 @@ def delete_order():
         print('\nSelected Order:\n')
         for key, value in selected_order.items():
             print(f'{key}: {value}')
-        confirm_delete_order(selected_order)
+        confirm_delete_order(order_index)
+        break
 
-def confirm_delete_order(selected_order):
+def confirm_delete_order(order_index):
     while True:
-        user_input = input(f"\nAre you sure you would like to remove this order from your Order List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
+        user_input = input(f"\nAre you sure you would like to remove this order from the Order List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
         if user_input == '0':
             print('\nDeletion cancelled.')
             order_menu()
             break
         elif user_input == '1':
             clear()
-            print(f'\nOrder has successfully been removed from your Order List.')
-            del selected_order
+            print(f'\nThe order has successfully been removed from the Order List.')
+            del orders[order_index]
             order_menu()
             break
         else:
@@ -490,7 +651,7 @@ def order_menu():
     clear()
     while True:
         print('ORDER MENU')
-        user_input = input("\nEnter '1' to view the Order List\nEnter '2' to add a new order to the Order List\nEnter '3' to change the Order Status of an order\nEnter '4' to delete an order from the Order List (COMING SOON)\nEnter '5' to delete an order from the Order List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
+        user_input = input("\nEnter '1' to view the Order List\nEnter '2' to add a new order to the Order List\nEnter '3' to change the Order Status of an order\nEnter '4' to update an existing order's information\nEnter '5' to delete an order from the Order List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
         if user_input == '00':
             exit_app()
         elif user_input == '0':
@@ -504,9 +665,13 @@ def order_menu():
             break
         elif user_input == '3':
             change_order_status_order_selection()
-        # elif user_input == '4':
+            break
+        elif user_input == '4':
+            replace_order_values()
+            break
         elif user_input == '5':
             delete_order()
+            break
         else:
             incorrect_command()
         
@@ -528,6 +693,9 @@ def main_menu():
             incorrect_command()
 
 start_app()
+
+### FIND where you enter '0' to 'skip' or not continue & change to empty str + pass
+### CHECK that when asking for input based on list numbers, indexing doesn't allow use of '0' (since -1 selects last element in list)
 
 ### ADD populate lists & update txt files functions throughout code?
 ### REFER to products & courier lists by index or name - CONSISTENCY - use n += 1 with for loop
