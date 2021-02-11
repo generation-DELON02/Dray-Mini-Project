@@ -22,37 +22,17 @@ def incorrect_command():
     clear()
     print("Sorry, we did not recognise the input! Please enter an appropriate command.\n")
 
-# def populate_product_list():
-#     try:
-#         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.txt') as product_list_file:
-#             for line in product_list_file.readlines():
-#                 products.append(line.rstrip())
-#     except Exception as e:
-#         print('An error occurred when attempting to update the Product List: ' + str(e))
+#def populate_product_list():
 
-# def populate_courier_list():
-#     try:
-#         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.txt') as courier_list_file:
-#             for line in courier_list_file.readlines():
-#                 couriers.append(line.rstrip())
-#     except Exception as e:
-#         print('An error occurred when attempting to update the Courier List: ' + str(e))
+#def populate_courier_list():
 
-# def update_products_txt_file():
-#     try:
-#         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.txt', 'w') as product_list_file:
-#             for product in products:
-#                 product_list_file.write(product + '\n')
-#     except Exception as e:
-#         print('An error occurred when attempting to update the product list text file: ' + str(e))
+#def populate_order_list():
 
-# def update_couriers_txt_file():
-#     try:
-#         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.txt', 'w') as courier_list_file:
-#             for name in couriers:
-#                 courier_list_file.write(name + '\n')
-#     except Exception as e:
-#         print('An error occurred when attempting to update the courier list text file: ' + str(e))
+#def update_products_csv_file():
+
+#def update_couriers_csv_file():
+
+#def update_orders_csv_file():
 
 def print_product_list():
     print('\nProduct List:\n')
@@ -64,7 +44,7 @@ def print_courier_list():
     for count, value in enumerate(couriers, 1):
         print(f'{count}: {value}')
 
-def print_order_list():     ### CHANGE to enumerate()
+def print_order_list():
     print('\nOrder List:\n')
     n = 1
     for order in orders:
@@ -73,18 +53,6 @@ def print_order_list():     ### CHANGE to enumerate()
         for key, value in order.items():
             print(f'{key}: {value}')
         print('\n')
-
-#def print_product_list():
-#    print('Product List:\n')
-#    for product in products:
-#        for key, value in product.items():
-#            print(f'{key}: {value}')
-
-#def print_courier_list():
-#    print('Courier List:\n')
-#    for courier in couriers:
-#        for key, value in courier.items():
-#            print(f'{key}:  {value}')
 
 def product_list():
     clear()
@@ -685,9 +653,8 @@ def main_menu():
 start_app()
 
 
-### ENUMERATE product & courier lists when printing them - SEE print_order_list() & commented print functions - try to lose n += 1 with for loop
-### CHANGE populate_list & update_csv_file functions (to have 1 of each &) to take arguments depending on if they're used for products or couriers (vs 2 seperate functions for populating/updating_csv_files) #SAME for orders?
-
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
+### PRINT product & courier lists without {} & each product/courier dict on one line
+
+### CHANGE populate_list & update_csv_file functions (to have 1 of each &) to take arguments depending on if they're used for products or couriers (vs 2 seperate functions for populating/updating_csv_files) #SAME for orders?
 ### ADD update csv files functions throughout code?
-### Make code even cleaner. Add functions to simplify each one
