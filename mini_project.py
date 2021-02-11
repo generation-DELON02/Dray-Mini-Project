@@ -685,7 +685,7 @@ def main_menu():
 start_app()
 
 
-### PLUS ENUMERATE product & courier lists when printing them - SEE print_order_list() & commented print functions - try to lose n += 1 with for loop
+### ENUMERATE product & courier lists when printing them - SEE print_order_list() & commented print functions - try to lose n += 1 with for loop
 ### CHANGE populate_list & update_csv_file functions (to have 1 of each &) to take arguments depending on if they're used for products or couriers (vs 2 seperate functions for populating/updating_csv_files) #SAME for orders?
 
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
