@@ -1,18 +1,20 @@
-products = [{'Name' : 'Pandan Cake', 'Price' : 2.5}, {'Name' : 'Chouquettes', 'Price' : 1.0}, {'Name' : 'Thai Iced Tea', 'Price' : 2.0}, {'Name' : 'Hot Chocolate', 'Price' : 1.5}]
-couriers = [{'Name' : 'Dillon', 'Contact Number' : '07931647478'}, {'Name' : 'Oscar', 'Contact Number' : '07800996961'}, {'Name' : 'Saskia', 'Contact Number' : '07931468682'}]
-order_1 = {'Name' : 'Andre L', 'Address' : '29 Holland Road, London, NW10 5AH', 'Contact Number' : '07931647470', 'Courier' : 2, 'Status' : 'Preparing', 'Items' : [1, 2, 3]}
-order_2 = {'Name' : 'Victoire C', 'Address' : '42 Cadogan Square, London, SW1 0HX', 'Contact Number' : '07800996961', 'Courier' : 3, 'Status' : 'Preparing', 'Items' : [1, 4]}
-orders = [order_1, order_2]
+import csv
+
+products = []
+couriers = []
+orders = []
 
 def start_app():
     print("\nWelcome to the London Region Anti Coffee Pop Up Café Business App")
-    #populate_product_list()
-    #populate_courier_list()
+    populate_product_list()
+    populate_courier_list()
+    populate_order_list()
     main_menu()
 
 def exit_app():
-    #update_products_txt_file()
-    #update_couriers_txt_file()
+    update_products_csv_file()
+    update_couriers_csv_file()
+    update_orders_csv_file()
     exit('\nExiting the app.')
 
 def clear():
@@ -22,17 +24,112 @@ def incorrect_command():
     clear()
     print("Sorry, we did not recognise the input! Please enter an appropriate command.\n")
 
-#def populate_product_list():
+# WRITING (PRODUCTS)
+def update_products_csv_file():
+    csv_keys = ['Name', 'Price']
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.csv', 'w') as product_list_file:
+            writer = csv.DictWriter(product_list_file, fieldnames = csv_keys)
+            writer.writeheader()
+            for data in products:
+                writer.writerow(data)
+    except Exception as e:
+        print('An error occurred when attempting to update the Product List: ' + str(e))
 
-#def populate_courier_list():
+#READING (PRODUCTS)
+def populate_product_list():
 
-#def populate_order_list():
+    def float_converter(x):
+        try:
+            x_float = float(x)
+        except ValueError:
+            pass
+        return x_float
 
-#def update_products_csv_file():
+    def convert_product_prices():
+        for product in products:
+            converted_value = float_converter(product['Price'])
+            product['Price'] = converted_value
 
-#def update_couriers_csv_file():
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.csv') as product_list_file:
+            file = csv.DictReader(product_list_file)
+            for line in file:
+                products.append(line)
+    except Exception as e:
+        print('An error occurred when attempting to read the product list csv file: ' + str(e))
 
-#def update_orders_csv_file():
+    convert_product_prices()
+
+# WRITING (COURIERS)
+def update_couriers_csv_file():
+    csv_keys = ['Name', 'Contact Number']
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.csv', 'w') as courier_list_file:
+            writer = csv.DictWriter(courier_list_file, fieldnames = csv_keys)
+            writer.writeheader()
+            for data in couriers:
+                writer.writerow(data)
+    except Exception as e:
+        print('An error occurred when attempting to update the Courier List: ' + str(e))
+
+# READING (COURIERS)
+def populate_courier_list():
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.csv') as courier_list_file:
+            file = csv.DictReader(courier_list_file)
+            for line in file:
+                couriers.append(line)
+    except Exception as e:
+        print('An error occurred when attempting to read the courier list csv file: ' + str(e))
+
+# WRITING (ORDERS)
+def update_orders_csv_file():
+    csv_keys = ['Name', 'Address', 'Contact Number', 'Courier', 'Status', 'Items']
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/order_list_file.csv', 'w') as order_list_file:
+            writer = csv.DictWriter(order_list_file, fieldnames = csv_keys)
+            writer.writeheader()
+            for data in orders:
+                writer.writerow(data)
+    except Exception as e:
+        print('An error occurred when attempting to update the Order List: ' + str(e))
+
+# READING (ORDERS)
+def populate_order_list():
+
+    def int_converter(x):
+        try:
+            x_int = int(x)
+        except ValueError:
+            pass
+        return x_int
+
+    def convert_courier_values():
+        for order in orders:
+            converted_int = int_converter(order['Courier'])
+            order['Courier'] = converted_int
+
+    def convert_item_values():
+        for order in orders:
+            converted_list = []
+            order['Items'] = list(order['Items'].split(', '))
+            for item in order['Items']:
+                clean_item = item.replace('[','').replace(']','')
+                converted_item = int_converter(clean_item)
+                converted_list.append(converted_item)
+            order['Items'] = converted_list
+
+    try:
+        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/order_list_file.csv') as order_list_file:
+            file = csv.DictReader(order_list_file)
+            for line in file:
+                orders.append(line)
+    except Exception as e:
+        print('An error occurred when attempting to read the order list csv file: ' + str(e))
+
+    convert_courier_values()
+    convert_item_values()
 
 def print_product_list():
     print('\nProduct List:\n')
@@ -376,6 +473,7 @@ def update_order_value_adding_product(selected_order):
         user_input = input("\nWhich product would you like to add to the order?\nPlease enter the listing number before the desired product.\nLeave blank & press Enter to skip adding products to the order: ")
         if user_input == "":
             update_order_value_removing_product(selected_order)
+            break
         try:
             user_input_int = int(user_input)
             products[user_input_int - 1]
@@ -385,9 +483,9 @@ def update_order_value_adding_product(selected_order):
         if user_input_int == 0:
             incorrect_command()
             continue
+        selected_order['Items'].append(user_input_int)
+        update_order_value_adding_another_product(selected_order)
         break
-    selected_order['Items'].append(user_input_int)
-    update_order_value_adding_another_product(selected_order)
 
 def update_order_value_adding_another_product(selected_order):
     while True:
@@ -418,6 +516,7 @@ def update_order_value_removing_product(selected_order):
         user_input = input("\nWhich product would you like to remove from the order?\nPlease enter the listing number associated to the desired product.\nLeave blank & press Enter to skip removing products from the order: ")
         if user_input == "":
             update_order_value_courier(selected_order)
+            break
         try:
             user_input_int = int(user_input)
             products[user_input_int - 1]
@@ -427,9 +526,9 @@ def update_order_value_removing_product(selected_order):
         if user_input_int == 0:
             incorrect_command()
             continue
+        selected_order['Items'].remove(user_input_int)
+        update_order_value_removing_another_product(selected_order)
         break
-    selected_order['Items'].remove(user_input_int)
-    update_order_value_removing_another_product(selected_order)
 
 def update_order_value_removing_another_product(selected_order):
     while True:
@@ -467,8 +566,8 @@ def update_order_value_courier(selected_order):
         if user_input_int == 0:
             incorrect_command()
             continue
+        selected_order['Courier'] = user_input_int
         break
-    selected_order['Courier'] = user_input_int
 
 def delete_product():
     clear()
@@ -652,7 +751,7 @@ def main_menu():
 
 start_app()
 
-
+### ACCOUNT for not allowing blank input when adding new order
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
 ### PRINT product & courier lists without {} & each product/courier dict on one line
 
