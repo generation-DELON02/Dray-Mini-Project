@@ -1,14 +1,23 @@
 import csv
+import os
+import pymysql
+from dotenv import load_dotenv
+
+load_dotenv()
+host = os.environ.get("mysql_host")
+user = os.environ.get("mysql_user")
+password = os.environ.get("mysql_pass")
+database = os.environ.get("mysql_db")
 
 products = []
 couriers = []
 orders = []
 
 def start_app():
-    print("\nWelcome to the London Region Anti Coffee Pop Up Café Business App")
-    populate_product_list()
-    populate_courier_list()
-    populate_order_list()
+    print("\nWelcome to the Anti Coffee Pop Up Café Business App")
+    clear_and_populate_product_list_from_db()
+    clear_and_populate_courier_list_from_db()
+    clear_and_populate_order_list_from_db()
     main_menu()
 
 def exit_app():
@@ -18,15 +27,67 @@ def exit_app():
     exit('\nExiting the app.')
 
 def clear():
-    print('\n'*3)
+    print('\n' * 3)
 
 def incorrect_command():
     clear()
     print("Sorry, we did not recognise the input! Please enter an appropriate command.\n")
 
-# WRITING (PRODUCTS)
+def clear_and_populate_product_list_from_db():
+    products.clear()
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM products"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+            for row in rows:
+                products.append(row)
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def clear_and_populate_courier_list_from_db():
+    couriers.clear()
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM couriers"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+            for row in rows:
+                couriers.append(row)
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def clear_and_populate_order_list_from_db():
+    orders.clear()
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM orders"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+            for row in rows:
+                orders.append(row)
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+    convert_item_values_to_list()
+
+def convert_item_values_to_list():
+    for order in orders:
+        converted_list = []
+        order['items'] = list(order['items'].split(', '))
+        for item in order['items']:
+            clean_item = item.replace('[','').replace(']','')
+            converted_item = int(clean_item)
+            converted_list.append(converted_item)
+        order['items'] = converted_list
+
 def update_products_csv_file():
-    csv_keys = ['Name', 'Price']
+    csv_keys = ['id', 'name', 'price']
     try:
         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.csv', 'w') as product_list_file:
             writer = csv.DictWriter(product_list_file, fieldnames = csv_keys)
@@ -34,36 +95,10 @@ def update_products_csv_file():
             for data in products:
                 writer.writerow(data)
     except Exception as e:
-        print('An error occurred when attempting to update the Product List: ' + str(e))
+        print('An error occurred when attempting to update the csv Product file: ' + str(e))
 
-#READING (PRODUCTS)
-def populate_product_list():
-
-    def float_converter(x):
-        try:
-            x_float = float(x)
-        except ValueError:
-            pass
-        return x_float
-
-    def convert_product_prices():
-        for product in products:
-            converted_value = float_converter(product['Price'])
-            product['Price'] = converted_value
-
-    try:
-        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/product_list_file.csv') as product_list_file:
-            file = csv.DictReader(product_list_file)
-            for line in file:
-                products.append(line)
-    except Exception as e:
-        print('An error occurred when attempting to read the product list csv file: ' + str(e))
-
-    convert_product_prices()
-
-# WRITING (COURIERS)
 def update_couriers_csv_file():
-    csv_keys = ['Name', 'Contact Number']
+    csv_keys = ['id', 'name', 'contact number']
     try:
         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.csv', 'w') as courier_list_file:
             writer = csv.DictWriter(courier_list_file, fieldnames = csv_keys)
@@ -71,21 +106,10 @@ def update_couriers_csv_file():
             for data in couriers:
                 writer.writerow(data)
     except Exception as e:
-        print('An error occurred when attempting to update the Courier List: ' + str(e))
+        print('An error occurred when attempting to update the csv Courier file: ' + str(e))
 
-# READING (COURIERS)
-def populate_courier_list():
-    try:
-        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/courier_list_file.csv') as courier_list_file:
-            file = csv.DictReader(courier_list_file)
-            for line in file:
-                couriers.append(line)
-    except Exception as e:
-        print('An error occurred when attempting to read the courier list csv file: ' + str(e))
-
-# WRITING (ORDERS)
 def update_orders_csv_file():
-    csv_keys = ['Name', 'Address', 'Contact Number', 'Courier', 'Status', 'Items']
+    csv_keys = ['id', 'name', 'address', 'contact number', 'courier', 'status', 'items']
     try:
         with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/order_list_file.csv', 'w') as order_list_file:
             writer = csv.DictWriter(order_list_file, fieldnames = csv_keys)
@@ -93,65 +117,31 @@ def update_orders_csv_file():
             for data in orders:
                 writer.writerow(data)
     except Exception as e:
-        print('An error occurred when attempting to update the Order List: ' + str(e))
-
-# READING (ORDERS)
-def populate_order_list():
-
-    def int_converter(x):
-        try:
-            x_int = int(x)
-        except ValueError:
-            pass
-        return x_int
-
-    def convert_courier_values():
-        for order in orders:
-            converted_int = int_converter(order['Courier'])
-            order['Courier'] = converted_int
-
-    def convert_item_values():
-        for order in orders:
-            converted_list = []
-            order['Items'] = list(order['Items'].split(', '))
-            for item in order['Items']:
-                clean_item = item.replace('[','').replace(']','')
-                converted_item = int_converter(clean_item)
-                converted_list.append(converted_item)
-            order['Items'] = converted_list
-
-    try:
-        with open('C:/Users/Ajl-24/Documents/Python/Mini_Project/order_list_file.csv') as order_list_file:
-            file = csv.DictReader(order_list_file)
-            for line in file:
-                orders.append(line)
-    except Exception as e:
-        print('An error occurred when attempting to read the order list csv file: ' + str(e))
-
-    convert_courier_values()
-    convert_item_values()
+        print('An error occurred when attempting to update the csv Order file: ' + str(e))
 
 def print_product_list():
     print('\nProduct List:\n')
-    for count, value in enumerate(products, 1):
-        print(f'{count}: {value}')
+    for product in products:
+        print(f"ID: {product['id']} - {product['name']}, £{product['price']}")
 
 def print_courier_list():
     print('\nCourier List:\n')
-    for count, value in enumerate(couriers, 1):
-        print(f'{count}: {value}')
+    for courier in couriers:
+        print(f"ID: {courier['id']} - {courier['name']}, {courier['contact number']}")
 
 def print_order_list():
     print('\nOrder List:\n')
-    n = 1
     for order in orders:
-        print(f'- {n} -')
-        n += 1
         for key, value in order.items():
-            print(f'{key}: {value}')
+            print(f'{key.title()}: {value}')
         print('\n')
 
-def product_list():
+def print_selected_order(selected_order):
+    print('\nSelected order:\n')
+    for key, value in selected_order.items():
+        print(f'{key.title()}: {value}')
+
+def view_products():
     clear()
     while True:
         print_product_list()
@@ -164,7 +154,7 @@ def product_list():
         else:
             incorrect_command()
 
-def courier_list():
+def view_couriers():
     clear()
     while True:
         print_courier_list()
@@ -177,7 +167,7 @@ def courier_list():
         else:
             incorrect_command()
 
-def order_list():
+def view_orders():
     clear()
     while True:
         print_order_list()
@@ -196,20 +186,38 @@ def add_product():
         user_input_1 = input("\nADD PRODUCT\n\nWhich product would you like to add to the Product List?\n(Note: Be aware that any input will add to the list!)\nIf you would not like to add to the Product List, enter '0' to cancel & return to Product Menu: ")
         if user_input_1 == '0':
             product_menu()
-        new_product = {'Name' : '', 'Price' : float}
-        new_product['Name'] = user_input_1.title()
+        elif user_input_1 == '':
+            incorrect_command()
+            continue
+        new_product = {'id': int, 'name': '', 'price': float}
+        new_product['name'] = user_input_1.title()
         try:
             user_input_2 = float(input("What is the price of this item? "))
         except:
             incorrect_command()
             continue
         break
-    new_product['Price'] = user_input_2
+    new_product['price'] = user_input_2
+    add_product_to_db(new_product)
+    clear_and_populate_product_list_from_db()
     print('\nThe following item was successfully added to the Product List:')
-    for key, value in new_product.items():
-        print(f'{key}: {value}')
-    products.append(new_product)
+    for product in products:
+        if product['name'] == new_product['name']:
+            for key, value in product.items():
+                print(f'{key}: {value}')
     product_menu()
+
+def add_product_to_db(new_product):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO products (name, price) VALUES (%s, %s)"
+            val = (new_product['name'], new_product['price'])
+            cursor.execute(sql, val)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's product table" + str(e))
 
 def add_courier():
     clear()
@@ -217,102 +225,184 @@ def add_courier():
         user_input_1 = input("\nADD COURIER\n\nWhat is the name of the courier you would like to add to the Courier List?\n(Note: Be aware that any input will add to the Courier List!)\nIf you would not like to add to the Courier List, enter '0' to cancel & return to Courier Menu: ")
         if user_input_1 == '0':
             courier_menu()
-        new_courier = {'Name' : '', 'Contact Number' : ''}
-        new_courier['Name'] = user_input_1.title()
+        new_courier = {'id': int, 'name' : '', 'contact number' : ''}
+        new_courier['name'] = user_input_1.title()
         try:
             user_input_2 = input("What is the courier's contact number? ")      #Is there a way to account for incorrect number/input?
         except:
             incorrect_command()
             continue
         break
-    new_courier['Contact Number'] = user_input_2
+    new_courier['contact number'] = user_input_2
+    add_courier_to_db(new_courier)
+    clear_and_populate_courier_list_from_db()
     print('\nThe following courier was successfully added to the Product List:')
-    for key, value in new_courier.items():
-        print(f'{key}: {value}')
-    couriers.append(new_courier)
+    for courier in couriers:
+        if courier['name'] == new_courier['name']:
+            for key, value in courier.items():
+                print(f'{key}: {value}')
     courier_menu()
+
+def add_courier_to_db(new_courier):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor: 
+            sql = "INSERT INTO couriers (name, `contact number`) VALUES (%s, %s)"
+            val = (new_courier['name'], new_courier['contact number'])
+            cursor.execute(sql, val)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's courier table" + str(e))
 
 def add_order():
     clear()
-    user_input_1 = input("ADD ORDER\n\nWhat is the name of the customer you wish to assign the new order to? (Note: Please be aware that any input in the next few steps will allocate information to the new order.)\nIf you would not like to add a new order, enter '0' to cancel new order & return to Order Menu: ")
-    if user_input_1 == '0':
-        order_menu()
-    new_order = {'Name' : '', 'Address' : '', 'Contact Number' : '', 'Courier': '', 'Status': 'Preparing', 'Items' : []}
-    new_order['Name'] = user_input_1.title()
-    user_input_2 = input("What is the full address for the order? ")
-    new_order['Address'] = user_input_2.title()
-    user_input_4 = input("What is the customer's contact number? ")
-    new_order['Contact Number'] = user_input_4
-    add_order_product(new_order)
-    add_order_another_product(new_order)
-    add_order_courier(new_order)
-    print('\n')
-    for key, value in new_order.items():
-        print(f'{key}: {value}')
-    print("\nThe new order has successfully been added to the Order List.")
-    orders.append(new_order)
+    print('ADD ORDER')
+    new_order = {'id': int, 'name': '', 'address': '', 'contact number': '', 'courier': int, 'status': 'Preparing', 'items': []}
+    add_order_add_name(new_order)
+    add_order_add_address(new_order)
+    add_order_add_contact_number(new_order)
+    add_order_add_product(new_order)
+    add_order_add_multiple_products(new_order)
+    add_order_add_courier(new_order)
+    add_order_to_db(new_order)
+    clear_and_populate_order_list_from_db()
+    for order in orders:
+        if order['name'] == new_order['name']:
+            print("\nThe new order has successfully been added to the Order List:\n")
+            for key, value in order.items():
+                print(f'{key.title()}: {value}')
     order_menu()
 
-def add_order_product(new_order):
+def add_order_add_name(new_order):
+    user_input = input("\nWhat is the name of the customer you wish to assign the new order to? (Note: Please be aware that any input in the next few steps will allocate information to the new order.)\nIf you would not like to add a new order, enter '0' to cancel new order & return to Order Menu: ")
+    if user_input == '0':
+        order_menu()
+    elif user_input == '':
+        incorrect_command()
+        add_order()
+    new_order['name'] = user_input.title()
+
+def add_order_add_address(new_order):
+    while True:
+        user_input = input("What is the full address for the order? ")
+        if user_input == '':
+            incorrect_command()
+            continue
+        new_order['address'] = user_input.title()
+        break
+
+def add_order_add_contact_number(new_order):
+    while True:
+        user_input = input("What is the customer's contact number? ")
+        if user_input == '':
+            incorrect_command()
+            continue
+        new_order['contact number'] = user_input
+        break
+
+def add_order_add_product(new_order):
     while True:
         print_product_list()
         try:
-            user_input = int(input("\nSelect a product from the list to add to the new order. Please enter the listing number before the desired product: "))
-            products[user_input - 1]
+            user_input = int(input("\nSelect a product from the list to add to the new order. Please enter the ID of the desired product: "))
         except:
             incorrect_command()
             continue
-        if user_input == 0:
+        for product in products:
+            if user_input == product['id']:
+                selected_product = product
+                break
+            else:
+                selected_product = None
+        if selected_product == None:
             incorrect_command()
             continue
         break
-    new_order['Items'].append(user_input)
+    new_order['items'].append(user_input)
 
-def add_order_another_product(new_order):
+def add_order_add_multiple_products(new_order):
     while True:
+        print('\nProducts in the new order:\n' + str(new_order['items']))
         print_product_list()
+        user_input = input("\nSelect another product to add to the new order if you would like. Please enter the ID of the desired product.\nLeave blank & press Enter to skip adding more products: ")
+        if user_input == '':
+            new_order['items'].sort()
+            break
         try:
-            user_input = int(input("\nSelect another product to add to the new order if you would like. Please enter the listing number before the desired product.\nEnter '0' to not add another product: "))
-            products[user_input - 1]
+            user_input_int = int(user_input)
         except:
             incorrect_command()
             continue
-        if user_input == 0:
-            break
-        new_order['Items'].append(user_input)
-    new_order['Items'].sort()
+        for product in products:
+            if user_input_int == product['id']:
+                selected_product = product
+                break
+            else:
+                selected_product = None
+        if selected_product == None:
+            incorrect_command()
+            continue
+        new_order['items'].append(user_input_int)
+        new_order['items'].sort()
 
-def add_order_courier(new_order):
+def add_order_add_courier(new_order):
     while True:
         print_courier_list()
         try:
-            user_input = int(input("\nSelect a courier from the list above.\nPlease enter the listing number before the desired courier: "))
-            couriers[user_input - 1]    
+            user_input = int(input("\nSelect a courier from the list above.\nPlease enter the ID of the desired courier: "))   
         except:
             incorrect_command()
             continue
         if user_input == 0:
             incorrect_command()
             continue
+        for courier in couriers:
+            if user_input == courier['id']:
+                selected_courier = courier
+                break
+            else:
+                selected_courier = None
+        if selected_courier == None:
+            incorrect_command()
+            continue
         break
-    new_order['Courier'] = user_input
+    new_order['courier'] = user_input
+
+def add_order_to_db(new_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO orders (name, address, `contact number`, courier, status, items) VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (new_order['name'], new_order['address'], new_order['contact number'], new_order['courier'], new_order['status'], str(new_order['items']))
+            cursor.execute(sql, val)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's order table" + str(e))
 
 def change_order_status_order_selection():
     clear()
     while True:
         print_order_list()
         try:
-            user_input = int(input("Which order would you like to change the status of?\nPlease enter the number of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
-            selected_order = orders[user_input - 1]
+            user_input = int(input("Which order would you like to change the status of?\nPlease enter the ID of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             order_menu()
+        for order in orders:
+            if user_input == order['id']:
+                selected_order = order
+                break
+            else:
+                selected_order = None
+        if selected_order == None:
+            incorrect_command()
+            continue
         break
-    print('\nSelected order:\n')
-    for key, value in selected_order.items():
-        print(f'{key}: {value}')
+    print_selected_order(selected_order)
     change_order_status_status_selection(selected_order)
 
 def change_order_status_status_selection(selected_order):
@@ -331,7 +421,16 @@ def change_order_status_status_selection(selected_order):
             incorrect_command()
             continue
         break
-    selected_order['Status'] = new_status
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET status = '{new_status}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+    selected_order['status'] = new_status
     print('\nOrder status succesfully updated:\n')
     for key, value in selected_order.items():
         print(f'{key}: {value}')
@@ -342,30 +441,47 @@ def update_product():
     while True:
         print_product_list()
         try:
-            user_input_1 = int(input("\nWhich product would you like to update?\nPlease enter the listing number before the desired product.\nEnter '0' to cancel update & return to Product Menu: "))
-            selected_product = products[user_input_1 - 1]
+            user_input = int(input("\nWhich product would you like to update?\nPlease enter the ID of the desired product.\nEnter '0' to cancel update & return to Product Menu: "))
         except:
             incorrect_command()
             continue
-        if user_input_1 == 0:
+        if user_input == 0:
             product_menu()
+        for product in products:
+            if user_input == product['id']:
+                selected_product = product
+                break
+            else:
+                selected_product = None
+        if selected_product == None:
+            incorrect_command()
+            continue
         break
-    print(f'\nSelected product:')
+    print('\nSelected product:')
     for key, value in selected_product.items():
         print(f'{key}: {value}')
     update_product_name(selected_product)
     product_menu()
 
 def update_product_name(selected_product):
-    user_input = input('\nWhat would you like to update the product with?\nLeave blank & press Enter to skip updating this piece of information: ')
+    user_input = input('\nWhat would you like to update the product name with?\nLeave blank & press Enter to skip updating this piece of information: ')
     if user_input == "":
         pass
     else:
         new_product_name = user_input.title()
-        print('\n' + selected_product['Name'] + f' has successfully been updated with {new_product_name}\n.')
-        selected_product['Name'] = new_product_name
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE products SET name = '{new_product_name}' WHERE id = {selected_product['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
+        print('\n' + selected_product['name'] + f' has successfully been updated with {new_product_name}.\n')
+        selected_product['name'] = new_product_name
     update_product_price(selected_product)
-    
+
 def update_product_price(selected_product):
     while True:
         user_input = input('What would you like to update the price of this product to?\nLeave blank & press Enter to skip updating this piece of information: ')
@@ -374,11 +490,20 @@ def update_product_price(selected_product):
         else:
             try:
                 new_product_price = float(user_input)
-                print(f"\n{selected_product['Price']} has successfully been updated with {new_product_price}.")
-                selected_product['Price'] = new_product_price
             except:
                 incorrect_command()
                 continue
+            try:
+                connection = pymysql.connect(host, user, password, database)
+                with connection.cursor() as cursor:
+                    sql = f"UPDATE products SET price = {new_product_price} WHERE id = {selected_product['id']}"
+                    cursor.execute(sql)
+                    connection.commit()
+                connection.close()
+            except Exception as e:
+                print('An error occurred when attempting to update the database: ' + str(e))
+            print(f"\n{selected_product['price']} has successfully been updated with {new_product_price}.")
+            selected_product['price'] = new_product_price
         break
 
 def update_courier():
@@ -386,28 +511,45 @@ def update_courier():
     while True:
         print_courier_list()
         try:
-            user_input = int(input("\nWhich courier would you like to update?\nPlease enter the listing number before the desired courier.\nEnter '0' to cancel update & return to Courier Menu: "))
-            selected_courier = couriers[user_input - 1]
+            user_input = int(input("\nWhich courier would you like to update?\nPlease enter the ID of the desired courier.\nEnter '0' to cancel update & return to Courier Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             courier_menu()
+        for courier in couriers:
+            if user_input == courier['id']:
+                selected_courier = courier
+                break
+            else:
+                selected_courier = None
+        if selected_courier == None:
+            incorrect_command()
+            continue
         break
-    print(f'\nSelected courier:')
+    print('\nSelected courier:')
     for key, value in selected_courier.items():
         print(f'{key}: {value}')
     update_courier_name(selected_courier)
     courier_menu()
 
 def update_courier_name(selected_courier):
-    user_input = input('\nWho would you like to update the courier with?\nLeave blank & press Enter to skip updating this piece of information: ')
+    user_input = input("\nWho would you like to update the courier's name with?\nLeave blank & press Enter to skip updating this piece of information: ")
     if user_input == "":
         pass
     else:
         new_courier_name = user_input.title()
-        print('\n' + selected_courier['Name'] + f' has successfully been updated with {new_courier_name}\n.')
-        selected_courier['Name'] = new_courier_name
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE couriers SET name = '{new_courier_name}' WHERE id = {selected_courier['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
+        print('\n' + selected_courier['name'] + f' has successfully been updated with {new_courier_name}.\n')
+        selected_courier['name'] = new_courier_name
     update_courier_number(selected_courier)
 
 def update_courier_number(selected_courier):
@@ -416,25 +558,40 @@ def update_courier_number(selected_courier):
         pass
     else:
         new_courier_number = user_input
-        print('\n' + selected_courier['Contact Number'] + f' has successfully been updated with {new_courier_number}.')
-        selected_courier['Contact Number'] = new_courier_number
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE couriers SET `contact number` = {new_courier_number} WHERE id = {selected_courier['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
+        print('\n' + selected_courier['contact number'] + f' has successfully been updated with {new_courier_number}.')
+        selected_courier['contact number'] = new_courier_number
 
 def update_order_values():
     clear()
     while True:
         print_order_list()
         try:
-            user_input = int(input("Which order would you like to update?\nPlease enter the number of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
-            selected_order = orders[user_input - 1]
+            user_input = int(input("Which order would you like to update?\nPlease enter the ID of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             order_menu()
+        for order in orders:
+            if user_input == order['id']:
+                selected_order = order
+                break
+            else:
+                selected_order = None
+        if selected_order == None:
+            incorrect_command()
+            continue
         break
-    print('\nSelected order:\n')
-    for key, value in selected_order.items():
-        print(f'{key}: {value}')
+    print_selected_order(selected_order)
     update_order_value_name(selected_order)
     print('\nOrder succesfully updated:\n')
     for key, value in selected_order.items():
@@ -446,7 +603,16 @@ def update_order_value_name(selected_order):
     if user_input == "":
         pass
     else:
-        selected_order['Name'] = user_input.title()
+        selected_order['name'] = user_input.title()
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE orders SET name = '{selected_order['name']}' WHERE id = {selected_order['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
     update_order_value_address(selected_order)
 
 def update_order_value_address(selected_order):
@@ -454,7 +620,16 @@ def update_order_value_address(selected_order):
     if user_input == "":
         pass
     else:
-        selected_order['Address'] = user_input.title()
+        selected_order['address'] = user_input.title()
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE orders SET address = '{selected_order['address']}' WHERE id = {selected_order['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
     update_order_value_contact_number(selected_order)
 
 def update_order_value_contact_number(selected_order):
@@ -462,208 +637,271 @@ def update_order_value_contact_number(selected_order):
     if user_input == "":
         pass
     else:
-        selected_order['Contact Number'] = user_input
+        selected_order['contact number'] = user_input
+        try:
+            connection = pymysql.connect(host, user, password, database)
+            with connection.cursor() as cursor:
+                sql = f"UPDATE orders SET `contact number` = '{selected_order['contact number']}' WHERE id = {selected_order['id']}"
+                cursor.execute(sql)
+                connection.commit()
+            connection.close()
+        except Exception as e:
+            print('An error occurred when attempting to update the database: ' + str(e))
     update_order_value_adding_product(selected_order)
 
 def update_order_value_adding_product(selected_order):
     while True:
         print('\n-Adding Products-')
         print_product_list()
-        print(f"\nProducts in the selected order:\n{selected_order['Items']}")
-        user_input = input("\nWhich product would you like to add to the order?\nPlease enter the listing number before the desired product.\nLeave blank & press Enter to skip adding products to the order: ")
+        print(f"\nProducts in the selected order:\n{selected_order['items']}")
+        user_input = input("\nWhich product would you like to add to the order?\nPlease enter the ID of the desired product.\nLeave blank & press Enter to skip adding products to the order: ")
         if user_input == "":
             update_order_value_removing_product(selected_order)
             break
         try:
-            user_input_int = int(user_input)
-            products[user_input_int - 1]
+            user_input_int = int(user_input)   
         except:
             incorrect_command()
             continue
         if user_input_int == 0:
             incorrect_command()
             continue
-        selected_order['Items'].append(user_input_int)
-        update_order_value_adding_another_product(selected_order)
-        break
-
-def update_order_value_adding_another_product(selected_order):
-    while True:
-        print('\n-Adding Products-')
-        print_product_list()
-        print(f"\nProducts in the selected order:\n{selected_order['Items']}")
-        user_input = input("\nIf you would like to add another product to the order, please enter the listing number before the desired product.\nLeave blank & press Enter to skip adding more products to the order: ")
-        if user_input == "":
-            selected_order['Items'].sort()
-            update_order_value_removing_product(selected_order)
-            break
-        try:
-            user_input_int = int(user_input)
-            products[user_input_int - 1]
-        except:
+        for product in products:
+            if user_input_int == product['id']:
+                selected_product = product
+                break
+            else:
+                selected_product = None
+        if selected_product == None:
             incorrect_command()
             continue
-        if user_input_int == 0:
-            incorrect_command()
-            continue
-        selected_order['Items'].append(user_input_int)
+        selected_order['items'].append(user_input_int)
+        selected_order['items'].sort()
+        update_order_items_in_db(selected_order)
 
 def update_order_value_removing_product(selected_order):
     while True:
         print('\n-Removing Products-')
         print_product_list()
-        print(f"\nProducts in the selected order:\n{selected_order['Items']}")
-        user_input = input("\nWhich product would you like to remove from the order?\nPlease enter the listing number associated to the desired product.\nLeave blank & press Enter to skip removing products from the order: ")
+        print(f"\nProducts in the selected order:\n{selected_order['items']}")
+        user_input = input("\nWhich product would you like to remove from the order?\nPlease enter the ID of the desired product.\nLeave blank & press Enter to skip removing products from the order: ")
         if user_input == "":
             update_order_value_courier(selected_order)
             break
         try:
             user_input_int = int(user_input)
-            products[user_input_int - 1]
         except:
             incorrect_command()
             continue
         if user_input_int == 0:
             incorrect_command()
             continue
-        selected_order['Items'].remove(user_input_int)
-        update_order_value_removing_another_product(selected_order)
-        break
-
-def update_order_value_removing_another_product(selected_order):
-    while True:
-        print('\n-Removing Products-')
-        print_product_list()
-        print(f"\nProducts in the selected order:\n{selected_order['Items']}")
-        user_input = input("\nIf you would like to remove another product to the order, please enter the listing number before the desired product.\nLeave blank & press Enter to skip removing more products from the order: ")
-        if user_input == "":
-            update_order_value_courier(selected_order)
-            break
-        try:
-            user_input_int = int(user_input)
-            products[user_input_int - 1]
-        except:
+        if user_input_int in selected_order['items']:
+            selected_order['items'].remove(user_input_int)
+            update_order_items_in_db(selected_order)
+        else:
             incorrect_command()
-            continue
-        if user_input_int == 0:
-            incorrect_command()
-            continue
-        selected_order['Items'].remove(user_input_int)
 
 def update_order_value_courier(selected_order):
     while True:
         print_courier_list()
-        print(f"\nCourier allocated to the selected order:\n{selected_order['Courier']}")
+        print(f"\nCourier allocated to the selected order:\n{selected_order['courier']}")
         user_input = input("\nSelect a courier from the list above to allocate to the order.\nPlease enter the listing number before the desired courier.\nLeave blank & press Enter to skip updating this piece of information: ")
         if user_input == "":
             break
         try:
             user_input_int = int(user_input)
-            couriers[user_input_int - 1]
         except:
             incorrect_command()
             continue
         if user_input_int == 0:
             incorrect_command()
             continue
-        selected_order['Courier'] = user_input_int
+        for courier in couriers:
+            if user_input_int == courier['id']:
+                selected_courier = courier
+                break
+            else:
+                selected_courier = None
+        if selected_courier == None:
+            incorrect_command()
+            continue
+        selected_order['courier'] = selected_courier['id']
+        update_order_courier_in_db(selected_order)
         break
+
+def update_order_items_in_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET items = '{str(selected_order['items'])}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's order table" + str(e))
+
+def update_order_courier_in_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET courier = {selected_order['courier']} WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's order table: " + str(e))
 
 def delete_product():
     clear()
     while True:
         print_product_list()
         try:
-            user_input = int(input("\nWhich product would you like to remove from the Product List?\nPlease enter the listing number before the product.\nEnter '0' to cancel deletion & return to Product Menu: "))
-            product_index = user_input - 1
-            selected_product = products[product_index]
+            user_input = int(input("\nWhich product would you like to remove from the Product List?\nPlease enter the ID of the product.\nEnter '0' to cancel deletion & return to Product Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             product_menu()
+        for product in products:
+            if user_input == product['id']:
+                selected_product = product
+                break
+            else:
+                selected_product = None
+        if selected_product == None:
+            incorrect_command()
+            continue
         break
-    confirm_delete_product(product_index, selected_product)
+    confirm_delete_product(selected_product)
 
-def confirm_delete_product(product_index, selected_product):
+def confirm_delete_product(selected_product):
     while True:
-        user_input = input(f"\nAre you sure you would like to remove {selected_product} from the Product List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
+        user_input = input(f"\nAre you sure you would like to remove {selected_product['name']} from the Product List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
         if user_input == '0':
             print('\nDeletion cancelled.')
         elif user_input == '1':
             clear()
+            delete_product_from_db(selected_product)
             print(f'\n{selected_product} has successfully been removed from the Product List.')
-            del products[product_index]
+            clear_and_populate_product_list_from_db()
         else:
             incorrect_command()
             continue
         break
     product_menu()
 
+def delete_product_from_db(selected_product):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"DELETE FROM products WHERE id = {selected_product['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's product table: " + str(e))
+
 def delete_courier():
     clear()
     while True:
         print_courier_list()
         try:
-            user_input = int(input("\nWhich courier would you like to remove from the Courier List?\nPlease enter the listing number before the courier.\nEnter '0' to cancel deletion & return to Courier Menu: "))
-            courier_index = user_input - 1
-            selected_courier = couriers[courier_index]
+            user_input = int(input("\nWhich courier would you like to remove from the Courier List?\nPlease enter the ID of the courier.\nEnter '0' to cancel deletion & return to Courier Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             courier_menu()
+        for courier in couriers:
+            if user_input == courier['id']:
+                selected_courier = courier
+                break
+            else:
+                selected_courier = None
+        if selected_courier == None:
+            incorrect_command()
+            continue
         break
-    confirm_delete_courier(courier_index, selected_courier)
+    confirm_delete_courier(selected_courier)
 
-def confirm_delete_courier(courier_index, selected_courier):
+def confirm_delete_courier(selected_courier):
     while True:
-        user_input = input(f"\nAre you sure you would like to remove {selected_courier} from the Courier List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
+        user_input = input(f"\nAre you sure you would like to remove {selected_courier['name']} from the Courier List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
         if user_input == '0':
             print('\nDeletion cancelled.')
         elif user_input == '1':
             clear()
-            print(f'{selected_courier} has successfully been removed from the Courier List.')
-            del couriers[courier_index]
+            delete_courier_from_db(selected_courier)
+            print(f'\n{selected_courier} has successfully been removed from the Courier List.')
+            clear_and_populate_courier_list_from_db()
         else:
             incorrect_command()
             continue
         break
     courier_menu()
 
+def delete_courier_from_db(selected_courier):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"DELETE FROM couriers WHERE id = {selected_courier['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's courier table: " + str(e))
+
 def delete_order():
     clear()
     while True:
         print_order_list()
         try:
-            user_input = int(input("\nWhich order would you like to remove from the Order List?\nPlease enter the number of the order.\nEnter '0' to cancel deletion & return to Order Menu: "))
-            order_index = user_input - 1
-            selected_order = orders[order_index]
+            user_input = int(input("\nWhich order would you like to remove from the Order List?\nPlease enter the ID of the order.\nEnter '0' to cancel deletion & return to Order Menu: "))
         except:
             incorrect_command()
             continue
         if user_input == 0:
             order_menu()
+        for order in orders:
+            if user_input == order['id']:
+                selected_order = order
+                break
+            else:
+                selected_order = None
+        if selected_order == None:
+            incorrect_command()
+            continue
         break
-    print('\nSelected Order:\n')
-    for key, value in selected_order.items():
-        print(f'{key}: {value}')
-    confirm_delete_order(order_index)
+    print_selected_order(selected_order)
+    confirm_delete_order(selected_order)
 
-def confirm_delete_order(order_index):
+def confirm_delete_order(selected_order):
     while True:
         user_input = input(f"\nAre you sure you would like to remove this order from the Order List?\n\nEnter '1' for YES\nEnter '0' for NO: ")
         if user_input == '0':
             print('\nDeletion cancelled.')
         elif user_input == '1':
             clear()
+            delete_order_from_db(selected_order)
+            clear_and_populate_order_list_from_db()
             print(f'The order has successfully been removed from the Order List.')
-            del orders[order_index]
         else:
             incorrect_command()
             continue
         break
     order_menu()
+
+def delete_order_from_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"DELETE FROM orders WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print("An error occurred when attempting to update the database's order table: " + str(e))
 
 def product_menu():
     clear()
@@ -675,7 +913,7 @@ def product_menu():
         elif user_input == '0':
             main_menu()
         elif user_input == '1':
-            product_list()
+            view_products()
         elif user_input == '2':
             add_product()
         elif user_input == '3':
@@ -697,7 +935,7 @@ def courier_menu():
         elif user_input == '0':
             main_menu()
         elif user_input == '1':
-            courier_list()
+            view_couriers()
         elif user_input == '2':
             add_courier()
         elif user_input == '3':
@@ -713,13 +951,13 @@ def order_menu():
     clear()
     while True:
         print('ORDER MENU')
-        user_input = input("\nEnter '1' to view the Order List\nEnter '2' to add a new order to the Order List\nEnter '3' to change the Order Status of an order\nEnter '4' to update an existing order's information\nEnter '5' to delete an order from the Order List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
+        user_input = input("\nEnter '1' to view the Order List\nEnter '2' to add a new order to the Order List\nEnter '3' to change the Order Status of an existing order\nEnter '4' to update an existing order's information\nEnter '5' to delete an order from the Order List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
         if user_input == '00':
             exit_app()
         elif user_input == '0':
             main_menu()
         elif user_input == '1':
-            order_list()
+            view_orders()
         elif user_input == '2':
             add_order()
         elif user_input == '3':
@@ -753,7 +991,6 @@ start_app()
 
 ### ACCOUNT for not allowing blank input when adding new order
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
-### PRINT product & courier lists without {} & each product/courier dict on one line
+### TRY to use ID check function - SEE update_product & more
 
-### CHANGE populate_list & update_csv_file functions (to have 1 of each &) to take arguments depending on if they're used for products or couriers (vs 2 seperate functions for populating/updating_csv_files) #SAME for orders?
 ### ADD update csv files functions throughout code?
