@@ -989,8 +989,7 @@ def main_menu():
 
 start_app()
 
-### ACCOUNT for not allowing blank input when adding new order
+### CREATE functions for each SQL command
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
-### TRY to use ID check function - SEE update_product & more
 
-### ADD update csv files functions throughout code?
+### TRY to use ID check function - SEE update_product & more
