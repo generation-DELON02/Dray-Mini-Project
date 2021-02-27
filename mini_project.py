@@ -141,6 +141,15 @@ def print_selected_order(selected_order):
     for key, value in selected_order.items():
         print(f'{key.title()}: {value}')
 
+def id_check_returns_dict(cached_list, user_input):
+    for item in cached_list:
+        if user_input == item['id']:
+            selected_item = item
+            break
+        else:
+            selected_item = None
+    return selected_item
+
 def view_products():
     clear()
     while True:
@@ -182,22 +191,9 @@ def view_orders():
 
 def add_product():
     clear()
-    while True:
-        user_input_1 = input("\nADD PRODUCT\n\nWhich product would you like to add to the Product List?\n(Note: Be aware that any input will add to the list!)\nIf you would not like to add to the Product List, enter '0' to cancel & return to Product Menu: ")
-        if user_input_1 == '0':
-            product_menu()
-        elif user_input_1 == '':
-            incorrect_command()
-            continue
-        new_product = {'id': int, 'name': '', 'price': float}
-        new_product['name'] = user_input_1.title()
-        try:
-            user_input_2 = float(input("What is the price of this item? "))
-        except:
-            incorrect_command()
-            continue
-        break
-    new_product['price'] = user_input_2
+    new_product = {'id': int, 'name': '', 'price': float}
+    new_product['name'] = add_product_name()
+    new_product['price'] = add_product_price()
     add_product_to_db(new_product)
     clear_and_populate_product_list_from_db()
     print('\nThe following item was successfully added to the Product List:')
@@ -206,6 +202,27 @@ def add_product():
             for key, value in product.items():
                 print(f'{key}: {value}')
     product_menu()
+
+def add_product_name():
+    while True:
+        user_input = input("\nADD PRODUCT\n\nWhich product would you like to add to the Product List?\n(Note: Be aware that any input will add to the list!)\nIf you would not like to add to the Product List, enter '0' to cancel & return to Product Menu: ")
+        if user_input == '0':
+            product_menu()
+        elif user_input == '':
+            incorrect_command()
+            continue
+        break
+    return user_input.title()
+
+def add_product_price():
+    while True:
+        try:
+            user_input = float(input("What is the price of this item? "))
+        except:
+            incorrect_command()
+            continue
+        break
+    return user_input
 
 def add_product_to_db(new_product):
     try:
@@ -221,19 +238,9 @@ def add_product_to_db(new_product):
 
 def add_courier():
     clear()
-    while True:
-        user_input_1 = input("\nADD COURIER\n\nWhat is the name of the courier you would like to add to the Courier List?\n(Note: Be aware that any input will add to the Courier List!)\nIf you would not like to add to the Courier List, enter '0' to cancel & return to Courier Menu: ")
-        if user_input_1 == '0':
-            courier_menu()
-        new_courier = {'id': int, 'name' : '', 'contact number' : ''}
-        new_courier['name'] = user_input_1.title()
-        try:
-            user_input_2 = input("What is the courier's contact number? ")      #Is there a way to account for incorrect number/input?
-        except:
-            incorrect_command()
-            continue
-        break
-    new_courier['contact number'] = user_input_2
+    new_courier = {'id': int, 'name' : '', 'contact number' : ''}
+    new_courier['name'] = add_courier_name()
+    new_courier['contact number'] = add_courier_number()
     add_courier_to_db(new_courier)
     clear_and_populate_courier_list_from_db()
     print('\nThe following courier was successfully added to the Product List:')
@@ -242,6 +249,29 @@ def add_courier():
             for key, value in courier.items():
                 print(f'{key}: {value}')
     courier_menu()
+
+def add_courier_name():
+    while True:
+        user_input = input("\nADD COURIER\n\nWhat is the name of the courier you would like to add to the Courier List?\n(Note: Be aware that any input will add to the Courier List!)\nIf you would not like to add to the Courier List, enter '0' to cancel & return to Courier Menu: ")
+        if user_input == '0':
+            courier_menu()
+        elif user_input == '':
+            incorrect_command()
+            continue
+        break
+    return user_input.title()
+
+def add_courier_number():
+    while True:
+        user_input = input("What is the courier's contact number? ")
+        if user_input == '':
+            incorrect_command()
+            continue
+        elif len(user_input) > 11:
+            incorrect_command()
+            continue
+        break
+    return user_input
 
 def add_courier_to_db(new_courier):
     try:
@@ -309,12 +339,7 @@ def add_order_add_product(new_order):
         except:
             incorrect_command()
             continue
-        for product in products:
-            if user_input == product['id']:
-                selected_product = product
-                break
-            else:
-                selected_product = None
+        selected_product = id_check_returns_dict(products, user_input)
         if selected_product == None:
             incorrect_command()
             continue
@@ -357,12 +382,7 @@ def add_order_add_courier(new_order):
         if user_input == 0:
             incorrect_command()
             continue
-        for courier in couriers:
-            if user_input == courier['id']:
-                selected_courier = courier
-                break
-            else:
-                selected_courier = None
+        selected_courier = id_check_returns_dict(couriers, user_input)
         if selected_courier == None:
             incorrect_command()
             continue
@@ -381,64 +401,6 @@ def add_order_to_db(new_order):
     except Exception as e:
         print("An error occurred when attempting to update the database's order table" + str(e))
 
-def change_order_status_order_selection():
-    clear()
-    while True:
-        print_order_list()
-        try:
-            user_input = int(input("Which order would you like to change the status of?\nPlease enter the ID of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
-        except:
-            incorrect_command()
-            continue
-        if user_input == 0:
-            order_menu()
-        for order in orders:
-            if user_input == order['id']:
-                selected_order = order
-                break
-            else:
-                selected_order = None
-        if selected_order == None:
-            incorrect_command()
-            continue
-        break
-    print_selected_order(selected_order)
-    change_order_status_status_selection(selected_order)
-
-def change_order_status_status_selection(selected_order):
-    while True:
-        print('\nWhat would you like to update the order status to?')
-        user_input = input("\nEnter '1' for 'Preparing'\nEnter '2' for 'Ready for collection'\nEnter '3' for 'Out for delivery'\nEnter '4' for 'Delivered': ")
-        if user_input == '1':
-            new_status = 'Preparing'
-        elif user_input == '2':
-            new_status = 'Ready For Collection'
-        elif user_input == '3':
-            new_status = 'Out For Delivery'
-        elif user_input == '4':
-            new_status = 'Delivered'
-        else:
-            incorrect_command()
-            continue
-        break
-    change_order_status_in_db(selected_order, new_status)
-    selected_order['status'] = new_status
-    print('\nOrder status succesfully updated:\n')
-    for key, value in selected_order.items():
-        print(f'{key}: {value}')
-    order_menu()
-
-def change_order_status_in_db(selected_order, new_status):
-    try:
-        connection = pymysql.connect(host, user, password, database)
-        with connection.cursor() as cursor:
-            sql = f"UPDATE orders SET status = '{new_status}' WHERE id = {selected_order['id']}"
-            cursor.execute(sql)
-            connection.commit()
-        connection.close()
-    except Exception as e:
-        print('An error occurred when attempting to update the database: ' + str(e))
-
 def update_product():
     clear()
     while True:
@@ -450,12 +412,7 @@ def update_product():
             continue
         if user_input == 0:
             product_menu()
-        for product in products:
-            if user_input == product['id']:
-                selected_product = product
-                break
-            else:
-                selected_product = None
+        selected_product = id_check_returns_dict(products, user_input)
         if selected_product == None:
             incorrect_command()
             continue
@@ -526,12 +483,7 @@ def update_courier():
             continue
         if user_input == 0:
             courier_menu()
-        for courier in couriers:
-            if user_input == courier['id']:
-                selected_courier = courier
-                break
-            else:
-                selected_courier = None
+        selected_courier = id_check_returns_dict(couriers, user_input)
         if selected_courier == None:
             incorrect_command()
             continue
@@ -585,6 +537,59 @@ def update_courier_number_in_db(selected_courier, new_courier_number):
     except Exception as e:
         print('An error occurred when attempting to update the database: ' + str(e))
 
+def update_order_status_order_selection():
+    clear()
+    while True:
+        print_order_list()
+        try:
+            user_input = int(input("Which order would you like to change the status of?\nPlease enter the ID of the desired order.\nEnter '0' to cancel update & return to Order Menu: "))
+        except:
+            incorrect_command()
+            continue
+        if user_input == 0:
+            order_menu()
+        selected_order = id_check_returns_dict(orders, user_input)
+        if selected_order == None:
+            incorrect_command()
+            continue
+        break
+    print_selected_order(selected_order)
+    update_order_status_status_selection(selected_order)
+
+def update_order_status_status_selection(selected_order):
+    while True:
+        print('\nWhat would you like to update the order status to?')
+        user_input = input("\nEnter '1' for 'Preparing'\nEnter '2' for 'Ready for collection'\nEnter '3' for 'Out for delivery'\nEnter '4' for 'Delivered': ")
+        if user_input == '1':
+            new_status = 'Preparing'
+        elif user_input == '2':
+            new_status = 'Ready For Collection'
+        elif user_input == '3':
+            new_status = 'Out For Delivery'
+        elif user_input == '4':
+            new_status = 'Delivered'
+        else:
+            incorrect_command()
+            continue
+        break
+    update_order_status_in_db(selected_order, new_status)
+    selected_order['status'] = new_status
+    print('\nOrder status succesfully updated:\n')
+    for key, value in selected_order.items():
+        print(f'{key}: {value}')
+    order_menu()
+
+def update_order_status_in_db(selected_order, new_status):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET status = '{new_status}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
 def update_order_values():
     clear()
     while True:
@@ -596,12 +601,7 @@ def update_order_values():
             continue
         if user_input == 0:
             order_menu()
-        for order in orders:
-            if user_input == order['id']:
-                selected_order = order
-                break
-            else:
-                selected_order = None
+        selected_order = id_check_returns_dict(orders, user_input)
         if selected_order == None:
             incorrect_command()
             continue
@@ -787,12 +787,7 @@ def delete_product():
             continue
         if user_input == 0:
             product_menu()
-        for product in products:
-            if user_input == product['id']:
-                selected_product = product
-                break
-            else:
-                selected_product = None
+        selected_product = id_check_returns_dict(products, user_input)
         if selected_product == None:
             incorrect_command()
             continue
@@ -837,12 +832,7 @@ def delete_courier():
             continue
         if user_input == 0:
             courier_menu()
-        for courier in couriers:
-            if user_input == courier['id']:
-                selected_courier = courier
-                break
-            else:
-                selected_courier = None
+        selected_courier = id_check_returns_dict(couriers, user_input)
         if selected_courier == None:
             incorrect_command()
             continue
@@ -887,12 +877,7 @@ def delete_order():
             continue
         if user_input == 0:
             order_menu()
-        for order in orders:
-            if user_input == order['id']:
-                selected_order = order
-                break
-            else:
-                selected_order = None
+        selected_order = id_check_returns_dict(orders, user_input)
         if selected_order == None:
             incorrect_command()
             continue
@@ -931,7 +916,7 @@ def product_menu():
     clear()
     while True:
         print('PRODUCT MENU')
-        user_input = input("\nEnter '1' to view the Product List\nEnter '2' to add a new product to the Product List\nEnter '3' to update the Product List by replacing a product with a new one\nEnter '4' to delete a product from the Product List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
+        user_input = input("\nEnter '1' to view the Product List\nEnter '2' to add a new product to the Product List\nEnter '3' to update a product in the Product List\nEnter '4' to delete a product from the Product List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
         if user_input == '00':
             exit_app()
         elif user_input == '0':
@@ -953,7 +938,7 @@ def courier_menu():
     clear()
     while True:
         print('COURIER MENU')
-        user_input = input("\nEnter '1' to view the Courier List\nEnter '2' to add a new courier to the Courier List\nEnter '3' to update the Courier List by replacing a courier with a new one\nEnter '4' to delete a courier from the Courier List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
+        user_input = input("\nEnter '1' to view the Courier List\nEnter '2' to add a new courier to the Courier List\nEnter '3' to update a courier in the Courier List\nEnter '4' to delete a courier from the Courier List\nEnter '0' to return to Main Menu\nEnter '00' to exit the app: ")
         if user_input == '00':
             exit_app()
         elif user_input == '0':
@@ -985,7 +970,7 @@ def order_menu():
         elif user_input == '2':
             add_order()
         elif user_input == '3':
-            change_order_status_order_selection()
+            update_order_status_order_selection()
         elif user_input == '4':
             update_order_values()
         elif user_input == '5':
@@ -1014,5 +999,3 @@ def main_menu():
 start_app()
 
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
-
-### TRY to use ID check function - SEE update_product & more
