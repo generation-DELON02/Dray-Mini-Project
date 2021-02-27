@@ -421,6 +421,14 @@ def change_order_status_status_selection(selected_order):
             incorrect_command()
             continue
         break
+    change_order_status_in_db(selected_order, new_status)
+    selected_order['status'] = new_status
+    print('\nOrder status succesfully updated:\n')
+    for key, value in selected_order.items():
+        print(f'{key}: {value}')
+    order_menu()
+
+def change_order_status_in_db(selected_order, new_status):
     try:
         connection = pymysql.connect(host, user, password, database)
         with connection.cursor() as cursor:
@@ -430,11 +438,6 @@ def change_order_status_status_selection(selected_order):
         connection.close()
     except Exception as e:
         print('An error occurred when attempting to update the database: ' + str(e))
-    selected_order['status'] = new_status
-    print('\nOrder status succesfully updated:\n')
-    for key, value in selected_order.items():
-        print(f'{key}: {value}')
-    order_menu()
 
 def update_product():
     clear()
@@ -469,15 +472,7 @@ def update_product_name(selected_product):
         pass
     else:
         new_product_name = user_input.title()
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE products SET name = '{new_product_name}' WHERE id = {selected_product['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
+        update_product_name_in_db(selected_product, new_product_name)
         print('\n' + selected_product['name'] + f' has successfully been updated with {new_product_name}.\n')
         selected_product['name'] = new_product_name
     update_product_price(selected_product)
@@ -493,18 +488,32 @@ def update_product_price(selected_product):
             except:
                 incorrect_command()
                 continue
-            try:
-                connection = pymysql.connect(host, user, password, database)
-                with connection.cursor() as cursor:
-                    sql = f"UPDATE products SET price = {new_product_price} WHERE id = {selected_product['id']}"
-                    cursor.execute(sql)
-                    connection.commit()
-                connection.close()
-            except Exception as e:
-                print('An error occurred when attempting to update the database: ' + str(e))
+            update_product_price_in_db(selected_product, new_product_price)
             print(f"\n{selected_product['price']} has successfully been updated with {new_product_price}.")
             selected_product['price'] = new_product_price
         break
+
+def update_product_name_in_db(selected_product, new_product_name):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE products SET name = '{new_product_name}' WHERE id = {selected_product['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def update_product_price_in_db(selected_product, new_product_price):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE products SET price = {new_product_price} WHERE id = {selected_product['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
 
 def update_courier():
     clear()
@@ -539,15 +548,7 @@ def update_courier_name(selected_courier):
         pass
     else:
         new_courier_name = user_input.title()
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE couriers SET name = '{new_courier_name}' WHERE id = {selected_courier['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
+        update_courier_name_in_db(selected_courier, new_courier_name)
         print('\n' + selected_courier['name'] + f' has successfully been updated with {new_courier_name}.\n')
         selected_courier['name'] = new_courier_name
     update_courier_number(selected_courier)
@@ -558,17 +559,31 @@ def update_courier_number(selected_courier):
         pass
     else:
         new_courier_number = user_input
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE couriers SET `contact number` = {new_courier_number} WHERE id = {selected_courier['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
+        update_courier_number_in_db(selected_courier, new_courier_number)
         print('\n' + selected_courier['contact number'] + f' has successfully been updated with {new_courier_number}.')
         selected_courier['contact number'] = new_courier_number
+
+def update_courier_name_in_db(selected_courier, new_courier_name):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE couriers SET name = '{new_courier_name}' WHERE id = {selected_courier['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def update_courier_number_in_db(selected_courier, new_courier_number):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE couriers SET `contact number` = {new_courier_number} WHERE id = {selected_courier['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
 
 def update_order_values():
     clear()
@@ -604,15 +619,7 @@ def update_order_value_name(selected_order):
         pass
     else:
         selected_order['name'] = user_input.title()
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE orders SET name = '{selected_order['name']}' WHERE id = {selected_order['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
+        update_order_name_in_db(selected_order)
     update_order_value_address(selected_order)
 
 def update_order_value_address(selected_order):
@@ -621,15 +628,7 @@ def update_order_value_address(selected_order):
         pass
     else:
         selected_order['address'] = user_input.title()
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE orders SET address = '{selected_order['address']}' WHERE id = {selected_order['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
+        update_order_address_in_db(selected_order)
     update_order_value_contact_number(selected_order)
 
 def update_order_value_contact_number(selected_order):
@@ -638,18 +637,10 @@ def update_order_value_contact_number(selected_order):
         pass
     else:
         selected_order['contact number'] = user_input
-        try:
-            connection = pymysql.connect(host, user, password, database)
-            with connection.cursor() as cursor:
-                sql = f"UPDATE orders SET `contact number` = '{selected_order['contact number']}' WHERE id = {selected_order['id']}"
-                cursor.execute(sql)
-                connection.commit()
-            connection.close()
-        except Exception as e:
-            print('An error occurred when attempting to update the database: ' + str(e))
-    update_order_value_adding_product(selected_order)
+        update_order_contact_number_in_db(selected_order)
+    update_order_value_adding_products(selected_order)
 
-def update_order_value_adding_product(selected_order):
+def update_order_value_adding_products(selected_order):
     while True:
         print('\n-Adding Products-')
         print_product_list()
@@ -729,6 +720,39 @@ def update_order_value_courier(selected_order):
         selected_order['courier'] = selected_courier['id']
         update_order_courier_in_db(selected_order)
         break
+
+def update_order_name_in_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET name = '{selected_order['name']}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def update_order_address_in_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET address = '{selected_order['address']}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
+
+def update_order_contact_number_in_db(selected_order):
+    try:
+        connection = pymysql.connect(host, user, password, database)
+        with connection.cursor() as cursor:
+            sql = f"UPDATE orders SET `contact number` = '{selected_order['contact number']}' WHERE id = {selected_order['id']}"
+            cursor.execute(sql)
+            connection.commit()
+        connection.close()
+    except Exception as e:
+        print('An error occurred when attempting to update the database: ' + str(e))
 
 def update_order_items_in_db(selected_order):
     try:
@@ -989,7 +1013,6 @@ def main_menu():
 
 start_app()
 
-### CREATE functions for each SQL command
 ### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
 
 ### TRY to use ID check function - SEE update_product & more
