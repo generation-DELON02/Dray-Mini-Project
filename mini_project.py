@@ -352,19 +352,13 @@ def add_order_add_multiple_products(new_order):
         print_product_list()
         user_input = input("\nSelect another product to add to the new order if you would like. Please enter the ID of the desired product.\nLeave blank & press Enter to skip adding more products: ")
         if user_input == '':
-            new_order['items'].sort()
             break
         try:
             user_input_int = int(user_input)
         except:
             incorrect_command()
             continue
-        for product in products:
-            if user_input_int == product['id']:
-                selected_product = product
-                break
-            else:
-                selected_product = None
+        selected_product = id_check_returns_dict(products, user_input_int)
         if selected_product == None:
             incorrect_command()
             continue
@@ -506,14 +500,19 @@ def update_courier_name(selected_courier):
     update_courier_number(selected_courier)
 
 def update_courier_number(selected_courier):
-    user_input = input("What would you like to update the courier's contact number to?\nLeave blank & press Enter to skip updating this piece of information: ")
-    if user_input == "":
-        pass
-    else:
-        new_courier_number = user_input
-        update_courier_number_in_db(selected_courier, new_courier_number)
-        print('\n' + selected_courier['contact number'] + f' has successfully been updated with {new_courier_number}.')
-        selected_courier['contact number'] = new_courier_number
+    while True:
+        user_input = input("What would you like to update the courier's contact number to?\nLeave blank & press Enter to skip updating this piece of information: ")
+        if user_input == "":
+            break
+        elif len(user_input) > 11:
+            incorrect_command()
+            continue
+        else:
+            new_courier_number = user_input
+            update_courier_number_in_db(selected_courier, new_courier_number)
+            print('\n' + selected_courier['contact number'] + f' has successfully been updated with {new_courier_number}.')
+            selected_courier['contact number'] = new_courier_number
+            break
 
 def update_courier_name_in_db(selected_courier, new_courier_name):
     try:
@@ -632,13 +631,18 @@ def update_order_value_address(selected_order):
     update_order_value_contact_number(selected_order)
 
 def update_order_value_contact_number(selected_order):
-    user_input = input("What would you like to replace the customer's contact number to?\nLeave blank & press Enter to skip updating this piece of information: ")
-    if user_input == "":
-        pass
-    else:
-        selected_order['contact number'] = user_input
-        update_order_contact_number_in_db(selected_order)
-    update_order_value_adding_products(selected_order)
+    while True:    
+        user_input = input("What would you like to replace the customer's contact number to?\nLeave blank & press Enter to skip updating this piece of information: ")
+        if user_input == "":
+            break
+        elif len(user_input) > 11:
+            incorrect_command()
+            continue
+        else:
+            selected_order['contact number'] = user_input
+            update_order_contact_number_in_db(selected_order)
+            break
+        update_order_value_adding_products(selected_order)
 
 def update_order_value_adding_products(selected_order):
     while True:
@@ -657,12 +661,7 @@ def update_order_value_adding_products(selected_order):
         if user_input_int == 0:
             incorrect_command()
             continue
-        for product in products:
-            if user_input_int == product['id']:
-                selected_product = product
-                break
-            else:
-                selected_product = None
+        selected_product = id_check_returns_dict(products, user_input_int)
         if selected_product == None:
             incorrect_command()
             continue
@@ -708,12 +707,7 @@ def update_order_value_courier(selected_order):
         if user_input_int == 0:
             incorrect_command()
             continue
-        for courier in couriers:
-            if user_input_int == courier['id']:
-                selected_courier = courier
-                break
-            else:
-                selected_courier = None
+        selected_courier = id_check_returns_dict(couriers, user_input_int)
         if selected_courier == None:
             incorrect_command()
             continue
@@ -997,5 +991,3 @@ def main_menu():
         break
 
 start_app()
-
-### Move clear() to bottom/end of functions & see empty lines + incorrect_command() & print_list() interactions
