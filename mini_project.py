@@ -642,7 +642,7 @@ def update_order_value_contact_number(selected_order):
             selected_order['contact number'] = user_input
             update_order_contact_number_in_db(selected_order)
             break
-        update_order_value_adding_products(selected_order)
+    update_order_value_adding_products(selected_order)
 
 def update_order_value_adding_products(selected_order):
     while True:
